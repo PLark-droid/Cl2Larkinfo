@@ -1,0 +1,78 @@
+{
+  "$schema": "./lark.schema.json",
+  "description": "Lark Bot Configuration for Claude Code Permission Notifications",
+
+  "app": {
+    "appId": "cli_xxxxxxxxxxxxxxxx",
+    "appSecret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "verificationToken": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+
+  "notification": {
+    "chatId": "oc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "timeoutSeconds": 300
+  },
+
+  "webhook": {
+    "serverUrl": "https://your-app.vercel.app",
+    "apiKey": "your-secure-api-key-here"
+  },
+
+  "riskLevels": {
+    "critical": {
+      "patterns": [
+        "rm\\s+-rf",
+        "rm\\s+.*-f",
+        "format",
+        "mkfs",
+        "dd\\s+if=",
+        ">\\s*/dev",
+        "chmod\\s+777",
+        "curl.*\\|\\s*(ba)?sh",
+        "wget.*\\|\\s*(ba)?sh"
+      ],
+      "requireApproval": true,
+      "color": "red"
+    },
+    "high": {
+      "patterns": [
+        "git\\s+push.*-f",
+        "git\\s+reset.*--hard",
+        "npm\\s+publish",
+        "docker\\s+rm",
+        "kubectl\\s+delete",
+        "drop\\s+database",
+        "truncate\\s+table"
+      ],
+      "requireApproval": true,
+      "color": "orange"
+    },
+    "medium": {
+      "patterns": [
+        "npm\\s+install",
+        "pip\\s+install",
+        "git\\s+checkout",
+        "git\\s+merge",
+        "docker\\s+run",
+        "kubectl\\s+apply"
+      ],
+      "requireApproval": true,
+      "color": "yellow"
+    },
+    "low": {
+      "patterns": [],
+      "requireApproval": false,
+      "color": "green"
+    }
+  },
+
+  "notes": {
+    "setup": [
+      "1. Create a Lark App at https://open.larksuite.com/app",
+      "2. Enable Bot capability and add to target chat",
+      "3. Set Event Subscription URL to: {serverUrl}/api/lark/callback",
+      "4. Add event: card.action.trigger",
+      "5. Copy credentials to environment variables"
+    ]
+  }
+}
