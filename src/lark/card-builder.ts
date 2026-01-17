@@ -146,6 +146,50 @@ export function buildPermissionCard(request: PermissionRequest): object {
           },
         ],
       },
+
+      // Divider
+      { tag: 'hr' },
+
+      // Text input section
+      {
+        tag: 'div',
+        text: {
+          tag: 'lark_md',
+          content: '**Send Instructions to Claude:**',
+        },
+      },
+
+      // Form with text input
+      {
+        tag: 'form',
+        name: 'message_form',
+        elements: [
+          {
+            tag: 'input',
+            name: 'user_message',
+            placeholder: {
+              tag: 'plain_text',
+              content: 'Type your instructions here...',
+            },
+            width: 'fill',
+            default_value: '',
+          },
+          {
+            tag: 'button',
+            text: {
+              tag: 'plain_text',
+              content: 'Send Message',
+            },
+            type: 'default',
+            action_type: 'form_submit',
+            name: 'submit_message',
+            value: {
+              requestId: request.requestId,
+              decision: 'message' as Decision,
+            },
+          },
+        ],
+      },
     ],
   };
 }
@@ -156,14 +200,94 @@ export function buildPermissionCard(request: PermissionRequest): object {
 export function buildResponseCard(
   request: PermissionRequest,
   decision: Decision,
-  respondedBy?: string
+  respondedBy?: string,
+  message?: string
 ): object {
-  const isApproved = decision === 'approve';
-  const color = isApproved ? 'green' : 'red';
-  const statusText = isApproved ? 'APPROVED' : 'DENIED';
-  const statusEmoji = isApproved ? '✓' : '✗';
+  let color: string;
+  let statusText: string;
+  let statusEmoji: string;
+
+  if (decision === 'approve') {
+    color = 'green';
+    statusText = 'APPROVED';
+    statusEmoji = '✓';
+  } else if (decision === 'message') {
+    color = 'blue';
+    statusText = 'MESSAGE SENT';
+    statusEmoji = '💬';
+  } else {
+    color = 'red';
+    statusText = 'DENIED';
+    statusEmoji = '✗';
+  }
 
   const commandDisplay = request.command || JSON.stringify(request.args, null, 2);
+
+  const elements: object[] = [
+    // Project info
+    {
+      tag: 'div',
+      fields: [
+        {
+          is_short: true,
+          text: {
+            tag: 'lark_md',
+            content: `**Project:** ${request.project}`,
+          },
+        },
+        {
+          is_short: true,
+          text: {
+            tag: 'lark_md',
+            content: `**Decision:** ${statusText}`,
+          },
+        },
+      ],
+    },
+
+    // Divider
+    { tag: 'hr' },
+
+    // Command that was approved/denied
+    {
+      tag: 'div',
+      text: {
+        tag: 'lark_md',
+        content: `**Tool:** \`${request.tool}\``,
+      },
+    },
+    {
+      tag: 'markdown',
+      content: `\`\`\`\n${commandDisplay}\n\`\`\``,
+    },
+  ];
+
+  // Add message if present
+  if (message) {
+    elements.push(
+      { tag: 'hr' },
+      {
+        tag: 'div',
+        text: {
+          tag: 'lark_md',
+          content: `**Message to Claude:**\n${message}`,
+        },
+      }
+    );
+  }
+
+  // Note
+  elements.push({
+    tag: 'note',
+    elements: [
+      {
+        tag: 'plain_text',
+        content: respondedBy
+          ? `Responded by user at ${new Date().toISOString()}`
+          : `Responded at ${new Date().toISOString()}`,
+      },
+    ],
+  });
 
   return {
     config: {
@@ -176,57 +300,7 @@ export function buildResponseCard(
         content: `${statusEmoji} Permission ${statusText}`,
       },
     },
-    elements: [
-      // Project info
-      {
-        tag: 'div',
-        fields: [
-          {
-            is_short: true,
-            text: {
-              tag: 'lark_md',
-              content: `**Project:** ${request.project}`,
-            },
-          },
-          {
-            is_short: true,
-            text: {
-              tag: 'lark_md',
-              content: `**Decision:** ${statusText}`,
-            },
-          },
-        ],
-      },
-
-      // Divider
-      { tag: 'hr' },
-
-      // Command that was approved/denied
-      {
-        tag: 'div',
-        text: {
-          tag: 'lark_md',
-          content: `**Tool:** \`${request.tool}\``,
-        },
-      },
-      {
-        tag: 'markdown',
-        content: `\`\`\`\n${commandDisplay}\n\`\`\``,
-      },
-
-      // Note
-      {
-        tag: 'note',
-        elements: [
-          {
-            tag: 'plain_text',
-            content: respondedBy
-              ? `Responded by user at ${new Date().toISOString()}`
-              : `Responded at ${new Date().toISOString()}`,
-          },
-        ],
-      },
-    ],
+    elements,
   };
 }
 

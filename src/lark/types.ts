@@ -16,11 +16,12 @@ export interface PermissionRequest {
 }
 
 // Decision response
-export type Decision = 'approve' | 'deny';
+export type Decision = 'approve' | 'deny' | 'message';
 
 export interface DecisionResponse {
   requestId: string;
   decision: Decision;
+  message?: string;  // Text instruction from user
   respondedAt: number;
   respondedBy?: string;
 }
@@ -28,7 +29,7 @@ export interface DecisionResponse {
 // Stored request state
 export interface StoredRequest {
   request: PermissionRequest;
-  status: 'pending' | 'approved' | 'denied' | 'expired';
+  status: 'pending' | 'approved' | 'denied' | 'expired' | 'message';
   decision?: DecisionResponse;
   larkMessageId?: string;
   createdAt: number;
@@ -74,6 +75,8 @@ export interface LarkCardCallback {
         decision: Decision;
       };
       tag: string;
+      input_value?: string;  // Text input from form
+      form_value?: Record<string, string>;  // Form values
     };
     host: string;
     delivery_type: string;
@@ -115,7 +118,8 @@ export interface NotifyResponse {
 }
 
 export interface StatusResponse {
-  status: 'pending' | 'approved' | 'denied' | 'expired' | 'not_found';
+  status: 'pending' | 'approved' | 'denied' | 'expired' | 'not_found' | 'message';
   decision?: Decision;
+  message?: string;  // Text instruction from user
   respondedAt?: number;
 }

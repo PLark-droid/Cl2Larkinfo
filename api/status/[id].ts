@@ -92,6 +92,10 @@ export default async function handler(
     if (stored.decision) {
       response.decision = stored.decision.decision;
       response.respondedAt = stored.decision.respondedAt;
+      // Include message if present
+      if (stored.decision.message) {
+        response.message = stored.decision.message;
+      }
     }
 
     res.status(200).json({

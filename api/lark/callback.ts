@@ -54,9 +54,26 @@ async function handleCardAction(
   }
 
   // Validate decision
-  if (decision !== 'approve' && decision !== 'deny') {
+  if (decision !== 'approve' && decision !== 'deny' && decision !== 'message') {
     res.status(400).json({ error: 'Invalid decision' });
     return;
+  }
+
+  // Extract message from form submission (for 'message' decision type)
+  let userMessage: string | undefined;
+  if (decision === 'message') {
+    // Try to get message from form_value first, then input_value
+    userMessage = action.form_value?.user_message || action.input_value;
+    if (!userMessage || userMessage.trim() === '') {
+      res.status(200).json({
+        toast: {
+          type: 'warning',
+          content: 'Please enter a message',
+        },
+      });
+      return;
+    }
+    userMessage = userMessage.trim();
   }
 
   try {
@@ -105,7 +122,7 @@ async function handleCardAction(
     }
 
     // Process decision
-    const success = await store.setDecision(requestId, decision, operator.open_id);
+    const success = await store.setDecision(requestId, decision, operator.open_id, userMessage);
 
     if (!success) {
       res.status(200).json({
@@ -124,15 +141,28 @@ async function handleCardAction(
         stored.larkMessageId,
         stored.request,
         decision,
-        operator.open_id
+        operator.open_id,
+        userMessage
       );
     }
 
     // Return success toast
-    const actionText = decision === 'approve' ? 'Approved' : 'Denied';
+    let actionText: string;
+    let toastType: 'success' | 'info';
+    if (decision === 'approve') {
+      actionText = 'Approved';
+      toastType = 'success';
+    } else if (decision === 'message') {
+      actionText = 'Message sent';
+      toastType = 'success';
+    } else {
+      actionText = 'Denied';
+      toastType = 'info';
+    }
+
     res.status(200).json({
       toast: {
-        type: decision === 'approve' ? 'success' : 'info',
+        type: toastType,
         content: `${actionText} successfully`,
       },
     });

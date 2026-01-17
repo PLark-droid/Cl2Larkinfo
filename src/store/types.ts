@@ -18,7 +18,7 @@ export interface RequestStore {
   /**
    * Update request with decision
    */
-  setDecision(requestId: string, decision: Decision, respondedBy?: string): Promise<boolean>;
+  setDecision(requestId: string, decision: Decision, respondedBy?: string, message?: string): Promise<boolean>;
 
   /**
    * Mark request as expired

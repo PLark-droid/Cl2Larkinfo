@@ -55,7 +55,8 @@ export class MemoryStore implements RequestStore {
   async setDecision(
     requestId: string,
     decision: Decision,
-    respondedBy?: string
+    respondedBy?: string,
+    message?: string
   ): Promise<boolean> {
     const stored = this.store.get(requestId);
 
@@ -74,10 +75,19 @@ export class MemoryStore implements RequestStore {
       return false;
     }
 
-    stored.status = decision === 'approve' ? 'approved' : 'denied';
+    // Determine status based on decision type
+    if (decision === 'approve') {
+      stored.status = 'approved';
+    } else if (decision === 'message') {
+      stored.status = 'message';
+    } else {
+      stored.status = 'denied';
+    }
+
     stored.decision = {
       requestId,
       decision,
+      message,
       respondedAt: Date.now(),
       respondedBy,
     };

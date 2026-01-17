@@ -45,7 +45,8 @@ export class KVStore implements RequestStore {
   async setDecision(
     requestId: string,
     decision: Decision,
-    respondedBy?: string
+    respondedBy?: string,
+    message?: string
   ): Promise<boolean> {
     const stored = await this.get(requestId);
 
@@ -57,12 +58,23 @@ export class KVStore implements RequestStore {
       return false;
     }
 
+    // Determine status based on decision type
+    let status: 'approved' | 'denied' | 'message';
+    if (decision === 'approve') {
+      status = 'approved';
+    } else if (decision === 'message') {
+      status = 'message';
+    } else {
+      status = 'denied';
+    }
+
     const updated: StoredRequest = {
       ...stored,
-      status: decision === 'approve' ? 'approved' : 'denied',
+      status,
       decision: {
         requestId,
         decision,
+        message,
         respondedAt: Date.now(),
         respondedBy,
       },

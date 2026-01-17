@@ -145,9 +145,10 @@ export class LarkClient {
     messageId: string,
     request: PermissionRequest,
     decision: Decision,
-    respondedBy?: string
+    respondedBy?: string,
+    message?: string
   ): Promise<void> {
-    const card = buildResponseCard(request, decision, respondedBy);
+    const card = buildResponseCard(request, decision, respondedBy, message);
     await this.updateMessage(messageId, card);
   }
 
