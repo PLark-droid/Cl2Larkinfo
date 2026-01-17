@@ -16,6 +16,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.x"
+  },
   "dependencies": {
     "@vercel/kv": "^2.0.0",
     "@vercel/node": "^3.0.0"
