@@ -1,6 +1,18 @@
 # Cl2Larkinfo
 
-Autonomous development powered by **Miyabi** - AI-driven development framework.
+Claude Code権限承認をLark経由で行うWebhookサーバーシステム + Miyabiフレームワーク統合
+
+## Lark権限通知システム
+
+Claude Codeがコマンド実行時に権限承認を必要とする場合、**Larkのチャットに通知を送り、ユーザーが承認/拒否をLark上で行える**仕組みを提供します。
+
+### 機能
+
+- Larkチャットへの権限リクエスト通知
+- インタラクティブカードによる承認/拒否
+- リスクレベル自動判定（Critical/High/Medium/Low）
+- Vercel KVによる状態管理
+- HMAC-SHA256署名検証
 
 ## Getting Started
 
@@ -115,6 +127,14 @@ Required secrets:
 - `ANTHROPIC_API_KEY` (add manually for agent execution)
 
 ## Documentation
+
+### Lark連携システム
+
+- **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - システムアーキテクチャ詳細
+- **[SETUP.md](./docs/SETUP.md)** - セットアップガイド
+- **[DISTRIBUTION.md](./docs/DISTRIBUTION.md)** - 配布・移植ガイド
+
+### Miyabiフレームワーク
 
 - **Miyabi Framework**: https://github.com/ShunsukeHayashi/Miyabi
 - **NPM Package**: https://www.npmjs.com/package/miyabi
