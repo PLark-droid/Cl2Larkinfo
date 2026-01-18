@@ -294,6 +294,7 @@ export function buildPermissionCard(request: PermissionRequest): object {
   return {
     config: {
       wide_screen_mode: true,
+      update_multi: true,
     },
     header: {
       template: riskColor,
@@ -444,6 +445,7 @@ export function buildResponseCard(
   return {
     config: {
       wide_screen_mode: true,
+      update_multi: true,
     },
     header: {
       template: color,
@@ -474,6 +476,7 @@ export function buildExpiredCard(request: PermissionRequest): object {
   return {
     config: {
       wide_screen_mode: true,
+      update_multi: true,
     },
     header: {
       template: 'grey',
