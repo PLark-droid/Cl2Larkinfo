@@ -151,6 +151,7 @@ export default async function handler(
       requestId,
       tool: body.tool,
       command: body.command,
+      description: body.description,
       args: body.args,
       workingDirectory: body.workingDirectory,
       project,

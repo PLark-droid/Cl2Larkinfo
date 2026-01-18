@@ -23,174 +23,99 @@ const RISK_LABELS: Record<string, string> = {
 
 /**
  * Build an interactive card for permission request
+ * Shows description, command, and action buttons
  */
 export function buildPermissionCard(request: PermissionRequest): object {
-  const color = RISK_COLORS[request.riskLevel] || 'orange';
-  const riskLabel = RISK_LABELS[request.riskLevel] || 'Unknown';
+  // Format command display - truncate if too long
+  let commandDisplay = request.command || JSON.stringify(request.args, null, 2);
+  if (commandDisplay.length > 300) {
+    commandDisplay = commandDisplay.substring(0, 300) + '...';
+  }
 
-  // Format command display
-  const commandDisplay = request.command || JSON.stringify(request.args, null, 2);
+  // Extract just the folder name from working directory
+  const folderName = request.workingDirectory.split('/').pop() || request.workingDirectory;
 
-  // Calculate time until expiration
-  const expiresInMs = request.expiresAt - Date.now();
-  const expiresInMinutes = Math.max(0, Math.ceil(expiresInMs / 60000));
+  // Build description text - show Japanese description if available
+  const descriptionText = request.description
+    ? `**${request.description}**`
+    : '';
+
+  // Build elements
+  const elements: object[] = [];
+
+  // Add description if available
+  if (descriptionText) {
+    elements.push({
+      tag: 'div',
+      text: {
+        tag: 'lark_md',
+        content: descriptionText,
+      },
+    });
+  }
+
+  // Add command in code block
+  elements.push({
+    tag: 'markdown',
+    content: `\`\`\`\n${commandDisplay}\n\`\`\``,
+  });
+
+  // Add action buttons
+  elements.push({
+    tag: 'action',
+    actions: [
+      {
+        tag: 'button',
+        text: {
+          tag: 'plain_text',
+          content: '✓ Yes',
+        },
+        type: 'primary',
+        value: {
+          requestId: request.requestId,
+          decision: 'approve' as Decision,
+        },
+      },
+      {
+        tag: 'button',
+        text: {
+          tag: 'plain_text',
+          content: '✓ Yes, always',
+        },
+        type: 'default',
+        value: {
+          requestId: request.requestId,
+          decision: 'approve' as Decision,
+          always: true,
+        },
+      },
+      {
+        tag: 'button',
+        text: {
+          tag: 'plain_text',
+          content: '✗ No',
+        },
+        type: 'danger',
+        value: {
+          requestId: request.requestId,
+          decision: 'deny' as Decision,
+        },
+      },
+    ],
+  });
 
   return {
     config: {
       wide_screen_mode: true,
     },
     header: {
-      template: color,
+      template: 'blue',
       title: {
         tag: 'plain_text',
-        content: 'Claude Code Permission Request',
+        content: `🤖 ${folderName}`,
       },
     },
-    elements: [
-      // Project and Risk Level
-      {
-        tag: 'div',
-        fields: [
-          {
-            is_short: true,
-            text: {
-              tag: 'lark_md',
-              content: `**Project:** ${request.project}`,
-            },
-          },
-          {
-            is_short: true,
-            text: {
-              tag: 'lark_md',
-              content: `**Risk Level:** ${riskLabel}`,
-            },
-          },
-        ],
-      },
-
-      // Divider
-      { tag: 'hr' },
-
-      // Tool name
-      {
-        tag: 'div',
-        text: {
-          tag: 'lark_md',
-          content: `**Tool:** \`${request.tool}\``,
-        },
-      },
-
-      // Command/Args display
-      {
-        tag: 'div',
-        text: {
-          tag: 'lark_md',
-          content: '**Command:**',
-        },
-      },
-      {
-        tag: 'markdown',
-        content: `\`\`\`\n${commandDisplay}\n\`\`\``,
-      },
-
-      // Working Directory
-      {
-        tag: 'div',
-        text: {
-          tag: 'lark_md',
-          content: `**Working Directory:**\n\`${request.workingDirectory}\``,
-        },
-      },
-
-      // Divider
-      { tag: 'hr' },
-
-      // Request metadata
-      {
-        tag: 'note',
-        elements: [
-          {
-            tag: 'plain_text',
-            content: `Request ID: ${request.requestId} | Expires in ${expiresInMinutes} minutes`,
-          },
-        ],
-      },
-
-      // Action buttons
-      {
-        tag: 'action',
-        actions: [
-          {
-            tag: 'button',
-            text: {
-              tag: 'plain_text',
-              content: 'Approve',
-            },
-            type: 'primary',
-            value: {
-              requestId: request.requestId,
-              decision: 'approve' as Decision,
-            },
-          },
-          {
-            tag: 'button',
-            text: {
-              tag: 'plain_text',
-              content: 'Deny',
-            },
-            type: 'danger',
-            value: {
-              requestId: request.requestId,
-              decision: 'deny' as Decision,
-            },
-          },
-        ],
-      },
-
-      // Divider
-      { tag: 'hr' },
-
-      // Text input section
-      {
-        tag: 'div',
-        text: {
-          tag: 'lark_md',
-          content: '**Send Instructions to Claude:**',
-        },
-      },
-
-      // Form with text input
-      {
-        tag: 'form',
-        name: 'message_form',
-        elements: [
-          {
-            tag: 'input',
-            name: 'user_message',
-            placeholder: {
-              tag: 'plain_text',
-              content: 'Type your instructions here...',
-            },
-            width: 'fill',
-            default_value: '',
-          },
-          {
-            tag: 'button',
-            text: {
-              tag: 'plain_text',
-              content: 'Send Message',
-            },
-            type: 'default',
-            action_type: 'form_submit',
-            name: 'submit_message',
-            value: {
-              requestId: request.requestId,
-              decision: 'message' as Decision,
-            },
-          },
-        ],
-      },
-    ],
+    elements,
   };
 }
 

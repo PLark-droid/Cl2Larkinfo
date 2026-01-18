@@ -134,38 +134,26 @@ async function handleCardAction(
       return;
     }
 
-    // Update card with decision
+    // Update card with decision (don't fail if update fails)
     if (stored.larkMessageId) {
-      const larkClient = createLarkClient();
-      await larkClient.updateWithDecision(
-        stored.larkMessageId,
-        stored.request,
-        decision,
-        operator.open_id,
-        userMessage
-      );
+      try {
+        const larkClient = createLarkClient();
+        await larkClient.updateWithDecision(
+          stored.larkMessageId,
+          stored.request,
+          decision,
+          operator.open_id,
+          userMessage
+        );
+      } catch (updateError) {
+        console.error('Card update failed (non-critical):', updateError);
+        // Don't fail the whole request - the decision was already saved
+      }
     }
 
-    // Return success toast
-    let actionText: string;
-    let toastType: 'success' | 'info';
-    if (decision === 'approve') {
-      actionText = 'Approved';
-      toastType = 'success';
-    } else if (decision === 'message') {
-      actionText = 'Message sent';
-      toastType = 'success';
-    } else {
-      actionText = 'Denied';
-      toastType = 'info';
-    }
-
-    res.status(200).json({
-      toast: {
-        type: toastType,
-        content: `${actionText} successfully`,
-      },
-    });
+    // Return empty response to avoid Lark toast errors
+    // The card update already shows the status
+    res.status(200).json({});
   } catch (error) {
     console.error('Error processing card action:', error);
     res.status(200).json({

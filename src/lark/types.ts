@@ -7,6 +7,7 @@ export interface PermissionRequest {
   requestId: string;
   tool: string;
   command?: string;
+  description?: string;  // Japanese description like "ワークフロー実行状況を確認"
   args?: Record<string, unknown>;
   workingDirectory: string;
   project: string;
@@ -106,6 +107,7 @@ export interface ApiResponse<T = unknown> {
 export interface NotifyRequest {
   tool: string;
   command?: string;
+  description?: string;
   args?: Record<string, unknown>;
   workingDirectory: string;
   project?: string;
